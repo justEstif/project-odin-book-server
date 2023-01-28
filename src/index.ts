@@ -1,76 +1,26 @@
-import { PrismaClient } from "@prisma/client";
-import express from "express";
-
-const prisma = new PrismaClient();
+import express, { urlencoded, json } from "express";
+import passport from "passport";
+import env from "./config/env";
+import routes from "./routes";
+import * as strategy from "./config/passport";
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = env.PORT;
 
-app.use(express.json());
-app.use(express.raw({ type: "application/vnd.custom-type" }));
-app.use(express.text({ type: "text/html" }));
+// body parser
+app.use(json());
+app.use(urlencoded({ extended: false }));
 
-app.get("/todos", async (req, res) => {
-  const todos = await prisma.todo.findMany({
-    orderBy: { createdAt: "desc" },
-  });
+// passport
+passport.use(strategy.magic);
+passport.use(strategy.facebook);
+passport.use(strategy.jwt);
+passport.use(strategy.anonymous);
+app.use(passport.initialize());
 
-  res.json(todos);
-});
+// routes
+app.use("/", routes);
 
-app.post("/todos", async (req, res) => {
-  const todo = await prisma.todo.create({
-    data: {
-      completed: false,
-      createdAt: new Date(),
-      text: req.body.text ?? "Empty todo",
-    },
-  });
-
-  return res.json(todo);
-});
-
-app.get("/todos/:id", async (req, res) => {
-  const id = req.params.id;
-  const todo = await prisma.todo.findUnique({
-    where: { id },
-  });
-
-  return res.json(todo);
-});
-
-app.put("/todos/:id", async (req, res) => {
-  const id = req.params.id;
-  const todo = await prisma.todo.update({
-    where: { id },
-    data: req.body,
-  });
-
-  return res.json(todo);
-});
-
-app.delete("/todos/:id", async (req, res) => {
-  const id = req.params.id;
-  await prisma.todo.delete({
-    where: { id },
-  });
-
-  return res.send({ status: "ok" });
-});
-
-app.get("/", async (req, res) => {
-  res.send(
-    `
-  <h1>Todo REST API</h1>
-  <h2>Available Routes</h2>
-  <pre>
-    GET, POST /todos
-    GET, PUT, DELETE /todos/:id
-  </pre>
-  `.trim(),
-  );
-});
-
-app.listen(Number(port), "0.0.0.0", () => {
-    console.log(`Example app listening at http://localhost:${port}`);
+app.listen(port, () => {
+  console.log(`Example app listening at http://localhost:${port}`);
 });

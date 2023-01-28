@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -10,9 +7,100 @@ generator client {
   provider = "prisma-client-js"
 }
 
-model Todo {
-  id        String   @id @default(uuid())
+model User {
+  id String @id @default(cuid())
+
+  // mandatory user profile
+  profile Profile @relation(fields: [profileId], references: [id])
+
+  // auth
+  email         String?    @unique
+  emailVerified DateTime?
+
+  // date
   createdAt DateTime @default(now())
-  text      String
-  completed Boolean
+
+  // posts
+  posts      Post[] @relation("Posts")
+  likedPosts Post[] @relation("LikedPosts")
+
+  // comments
+  comments      Comment[] @relation("Comments")
+  likedComments Comment[] @relation("LikedComments")
+
+  // received requests
+  sentRequests     User[] @relation("Requests")
+  receivedRequests User[] @relation("Requests")
+
+  // friends
+  friends   User[]    @relation("Friends")
+  friendsOf User[]    @relation("Friends")
+  profileId String
+  account   Account[]
+}
+
+model Profile {
+  id    String @id @default(cuid())
+  name  String
+  image String
+  bio   String
+  user  User[]
+}
+
+model Post {
+  id String @id @default(cuid())
+
+  // date
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // post content
+  content String
+  // TODO: content type
+
+  // user
+  user   User   @relation("Posts", fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+
+  // likes
+  likes User[] @relation("LikedPosts")
+
+  // comments
+  comments Comment[] @relation("Comments")
+}
+
+model Comment {
+  id      String @id @default(cuid())
+  content String
+
+  // date
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // post
+  post   Post   @relation("Comments", fields: [postId], references: [id], onDelete: Cascade)
+  postId String
+
+  // user
+  user   User   @relation("Comments", fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+
+  // likes
+  likes User[] @relation("LikedComments")
+
+  // comment to comment relation
+  parentComment   Comment?  @relation("CommentParentsComment", fields: [parentCommentId], references: [id])
+  parentCommentId String?
+  childComments   Comment[] @relation("CommentParentsComment")
+}
+
+// Information about OAuth accounts associated with a user
+model Account {
+  id                String @id @default(cuid())
+  provider          String @unique
+  providerAccountId String @unique
+  user              User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId            String
+
+  @@map(name: "accounts")
 }
