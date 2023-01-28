@@ -1,0 +1,10 @@
+-- DropForeignKey
+ALTER TABLE "User" DROP CONSTRAINT "User_profileId_fkey";
+
+-- AlterTable
+ALTER TABLE "Profile" ALTER COLUMN "name" DROP DEFAULT,
+ALTER COLUMN "image" DROP DEFAULT,
+ALTER COLUMN "bio" DROP DEFAULT;
+
+-- AddForeignKey
+ALTER TABLE "User" ADD CONSTRAINT "User_profileId_fkey" FOREIGN KEY ("profileId") REFERENCES "Profile"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
