@@ -79,7 +79,6 @@ export const magic = new MagicLoginStrategy({
           pass: env.EMAIL_SERVER_PASSWORD,
         },
       });
-
       await transporter.sendMail({
         from: env.EMAIL_FROM,
         to: destination,

@@ -11,6 +11,10 @@ const port = env.PORT;
 app.use(json());
 app.use(urlencoded({ extended: false }));
 
+// set the view engine to ejs
+app.set('views', __dirname + '/views');
+app.set('view engine', 'ejs');
+
 // passport
 passport.use(strategy.magic);
 passport.use(strategy.facebook);

@@ -2,7 +2,7 @@
   "name": "expressjs-prisma",
   "version": "1.0.0",
   "main": "index.js",
-  "author": "Jake Runzer",
+  "author": "Estifanos Beyene",
   "license": "MIT",
   "scripts": {
     "dev": "nodemon src/index.ts",
@@ -16,6 +16,7 @@
   "dependencies": {
     "@prisma/client": "^4.8.1",
     "dotenv": "^16.0.3",
+    "ejs": "^3.1.8",
     "express": "^4.18.2",
     "nodemailer": "^6.9.1",
     "zod": "^3.20.2"
